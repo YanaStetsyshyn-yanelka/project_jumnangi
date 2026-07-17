@@ -32,4 +32,51 @@ def start_game():
 """)
 
     input(f"\n{GREEN}▶ Натисніть Enter, щоб почати пригоду...{RESET}")
+def choose_class():
+    global hero_class, hp, attack, fear, money
+
+    while True:
+        class_choose = input(
+            "\033[31mВиберіть Ваш клас Медик (Натисніть 1), "
+            "Мисливець (Натисніть 2), "
+            "Дослідник (Натисніть 3): "
+        )
+
+        if class_choose in ['1', '2', '3']:
+            break
+
+        print("Невірний вибір. Спробуйте ще раз.")
+
+    if class_choose == "1":
+        hero_class = 'Медик'
+        hp = 150
+        attack = 10
+        fear = 'Паніка'
+        money = 15
+
+    elif class_choose == "2":
+        hero_class = 'Мисливець'
+        hp = 100
+        attack = 25
+        fear = 'Вогонь'
+        money = 15
+
+    elif class_choose == "3":
+        hero_class = 'Дослідник'
+        hp = 90
+        attack = 20
+        fear = 'Спрага'
+        money = 15
+
+    print(f"""
+======================================
+Ви вибрали клас: {hero_class}
+
+❤️ Здоров'я: {hp}
+⚔️ Атака: {attack}
+😨 Страх: {fear}
+💰 Кошти: {money}
+======================================
+""")
+
 
