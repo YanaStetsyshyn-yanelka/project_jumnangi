@@ -1,4 +1,6 @@
 def start_game():
+    global player_name
+
     RED = "\033[31m"
     GREEN = "\033[32m"
     YELLOW = "\033[33m"
@@ -11,8 +13,12 @@ def start_game():
 ║            ЛІС ЗАГУБЛЕНИХ ДУШ               ║
 ╚══════════════════════════════════════════════╝
 {RESET}
+""")
 
-{GREEN}Ви прокидаєтесь посеред густого лісу.
+    player_name = input(f"{YELLOW}Як вас звати, мандрівнику?: {RESET}")
+
+    print(f"""
+{GREEN}Привіт, {BOLD}{player_name}{RESET}{GREEN}! Ви прокидаєтесь посеред густого лісу.
 Навколо панує моторошна тиша, а між деревами
 повільно стелиться холодний туман.{RESET}
 
@@ -28,7 +34,7 @@ def start_game():
 
 {BOLD}Ваше завдання — вижити та знайти вихід.{RESET}
 
-{YELLOW}Удачі, мандрівнику...{RESET}
+{YELLOW}Удачі, {player_name}...{RESET}
 """)
 
     input(f"\n{GREEN}▶️ Натисніть Enter, щоб почати пригоду...{RESET}")
