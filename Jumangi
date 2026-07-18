@@ -1,6 +1,56 @@
-def start_game():
-    global player_name
+# ===========================================
+# ЛІС ЗАГУБЛЕНИХ ДУШ
+# ===========================================
 
+import random
+
+RIDDLES = [
+    {"question": "Що можна побачити з заплющеними очима?", "answer": "сон"},
+    {"question": "Що завжди збільшується, але ніколи не зменшується?", "answer": "час"},
+    {"question": "Що має багато ключів, але не може відкрити жодних дверей?", "answer": "піаніно"},
+    {"question": "Чим більше з неї береш, тим більшою вона стає?", "answer": "яма"},
+]
+
+
+def create_state():
+    return {
+        "name": "",
+        "hero_class": "",
+        "hp": 0,
+        "attack": 0,
+        "fear": "",
+        "money": 0,
+        "inventory": [],
+        "forest_money": False,
+        "desert_complete": False,
+        "mountain_complete": False,
+        "have_key": False,
+        "volcano_complete": False,
+        "armor": False,
+        "weapon": False,
+    }
+
+
+def show_past_games():
+    try:
+        with open("results.txt", "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        return
+
+    if not lines:
+        return
+
+    YELLOW = "\033[33m"
+    RESET = "\033[0m"
+
+    print(f"{YELLOW}=== Історія минулих пригод ==={RESET}")
+    for line in lines[-5:]:
+        print(line)
+    print(f"{YELLOW}==============================={RESET}\n")
+
+
+def start_game(state):
     RED = "\033[31m"
     GREEN = "\033[32m"
     YELLOW = "\033[33m"
@@ -15,10 +65,10 @@ def start_game():
 {RESET}
 """)
 
-    player_name = input(f"{YELLOW}Як вас звати, мандрівнику?: {RESET}")
+    show_past_games()
 
     print(f"""
-{GREEN}Привіт, {BOLD}{player_name}{RESET}{GREEN}! Ви прокидаєтесь посеред густого лісу.
+{GREEN}Ви прокидаєтесь посеред густого лісу.
 Навколо панує моторошна тиша, а між деревами
 повільно стелиться холодний туман.{RESET}
 
@@ -33,16 +83,19 @@ def start_game():
 який охороняє шлях до свободи.{RESET}
 
 {BOLD}Ваше завдання — вижити та знайти вихід.{RESET}
+""")
 
-{YELLOW}Удачі, {player_name}...{RESET}
+    state["name"] = input(f"{YELLOW}Як вас звати, мандрівнику?: {RESET}")
+
+    print(f"""
+{GREEN}Привіт, {BOLD}{state["name"]}{RESET}{GREEN}!
+Удачі, {state["name"]}...{RESET}
 """)
 
     input(f"\n{GREEN}▶️ Натисніть Enter, щоб почати пригоду...{RESET}")
 
 
-def choose_class():
-    global hero_class, hp, attack, fear, money
-
+def choose_class(state):
     while True:
         class_choose = input(
             "\033[31mВиберіть Ваш клас:      Медик (Натисніть 1), "
@@ -56,55 +109,43 @@ def choose_class():
         print("Невірний вибір. Спробуйте ще раз.")
 
     if class_choose == "1":
-        hero_class = 'Медик'
-        hp = 150
-        attack = 10
-        fear = 'Паніка'
-        money = 15
+        state["hero_class"] = 'Медик'
+        state["hp"] = 150
+        state["attack"] = 10
+        state["fear"] = 'Паніка'
+        state["money"] = 15
 
     elif class_choose == "2":
-        hero_class = 'Мисливець'
-        hp = 100
-        attack = 25
-        fear = 'Вогонь'
-        money = 15
+        state["hero_class"] = 'Мисливець'
+        state["hp"] = 100
+        state["attack"] = 25
+        state["fear"] = 'Вогонь'
+        state["money"] = 15
 
     elif class_choose == "3":
-        hero_class = 'Дослідник'
-        hp = 90
-        attack = 20
-        fear = 'Спрага'
-        money = 15
+        state["hero_class"] = 'Дослідник'
+        state["hp"] = 90
+        state["attack"] = 20
+        state["fear"] = 'Спрага'
+        state["money"] = 15
 
     print(f"""
 ======================================
-Ви вибрали клас: {hero_class}
+Ви вибрали клас: {state["hero_class"]}
 
-❤️ Здоров'я: {hp}
-⚔️ Атака: {attack}
-😨 Страх: {fear}
-💰 Кошти: {money}
+❤️ Здоров'я: {state["hp"]}
+⚔️ Атака: {state["attack"]}
+😨 Страх: {state["fear"]}
+💰 Кошти: {state["money"]}
 ======================================
 """)
-
-
-
 
 
 # ===========================================
 # LOCATION №1 || FOREST
 # ===========================================
 
-inventory = []
-forest_money = False
-
-def forest():
-    global money
-    global hp
-    global inventory
-    global hero_class
-    global forest_money
-
+def forest(state):
     while True:
         print("""
 ===========================
@@ -120,15 +161,15 @@ def forest():
         choice = input("Ваш вибір: ")
 
         if choice == "1":
-            if forest_money == False:
-                if hero_class == "Дослідник":
+            if state["forest_money"] == False:
+                if state["hero_class"] == "Дослідник":
                     print("Ви знайшли 20 монет.")
-                    money += 20
+                    state["money"] += 20
                 else:
                     print("Ви знайшли 15 монет.")
-                    money += 15
-                forest_money = True
-                print("Ваші гроші:", money)
+                    state["money"] += 15
+                state["forest_money"] = True
+                print("Ваші гроші:", state["money"])
             else:
                 print("Ви вже все оглянули.")
         elif choice == "2":
@@ -142,17 +183,17 @@ def forest():
 """)
                 shop = input("Ваш вибір: ")
                 if shop == "1":
-                    if money >= 5:
-                        money -= 5
-                        inventory.append("Вода")
+                    if state["money"] >= 5:
+                        state["money"] -= 5
+                        state["inventory"].append("Вода")
                         print("Воду куплено.")
                     else:
                         print("Недостатньо грошей.")
                 elif shop == "2":
-                    if money >= 3:
-                        money -= 3
-                        inventory.append("Бинт")
-                        hp += 10
+                    if state["money"] >= 3:
+                        state["money"] -= 3
+                        state["inventory"].append("Бинт")
+                        state["hp"] += 10
                         print("+10 HP")
                     else:
                         print("Недостатньо грошей.")
@@ -160,10 +201,10 @@ def forest():
                     break
         elif choice == "4":
             print("\nІНВЕНТАР:")
-            if len(inventory) == 0:
+            if len(state["inventory"]) == 0:
                 print("Порожньо.")
             else:
-                for item in inventory:
+                for item in state["inventory"]:
                     print("-", item)
         elif choice == "3":
             print("Ви залишаєте ліс.")
@@ -175,15 +216,7 @@ def forest():
 # LOCATION №2 || DESERT
 # ===========================================
 
-desert_complete = False
-
-def desert():
-    global hp
-    global money
-    global inventory
-    global hero_class
-    global desert_complete
-
+def desert(state):
     print("""
 ===========================
           ПУСТЕЛЯ
@@ -193,29 +226,29 @@ def desert():
     print("Сонце виснажує вас.")
 
     # Особливість Дослідника
-    if hero_class == "Дослідник":
+    if state["hero_class"] == "Дослідник":
         print("\nВаша перевага допомогла вам.")
         print("Ви витримали спеку.")
     else:
-        if "Вода" in inventory:
+        if "Вода" in state["inventory"]:
             while True:
                 use = input("\nУ вас є вода. Використати? (так/ні): ").lower()
                 if use == "так":
-                    inventory.remove("Вода")
+                    state["inventory"].remove("Вода")
                     print("Ви випили воду.")
                     break
                 elif use == "ні":
-                    hp -= 20
+                    state["hp"] -= 20
                     print("-20 HP")
                     break
                 else:
                     print("Введіть так або ні.")
         else:
-            hp -= 20
+            state["hp"] -= 20
             print("У вас немає води.")
             print("-20 HP")
 
-    if hp <= 0:
+    if state["hp"] <= 0:
         print("Ви загинули від спраги.")
         return
 
@@ -229,7 +262,7 @@ def desert():
         choice = input("Ваш вибір: ")
         if choice == "1":
             print("Ви потрапили у сипучий пісок.")
-            hp -= 15
+            state["hp"] -= 15
             print("-15 HP")
             break
         elif choice == "2":
@@ -238,117 +271,109 @@ def desert():
         else:
             print("Невірний вибір.")
 
-    if hp <= 0:
+    if state["hp"] <= 0:
         print("Ви загинули.")
         return
 
     print("\nВи знайшли старий мішечок.")
-    money += 10
+    state["money"] += 10
     print("+10 монет")
-    print("Монети:", money)
-    desert_complete = True
+    print("Монети:", state["money"])
+    state["desert_complete"] = True
 
 # ===========================================
 # LOCATION №3 || MOUNTAINS
 # ===========================================
 
-mountain_complete = False
-have_key = False
-
-def mountains():
-    global hp
-    global inventory
-    global hero_class
-    global mountain_complete
-    global have_key
-
+def mountains(state):
     print("""
 ===========================
            ГОРИ
 ===========================
 """)
-    print("Перед вами величезна прірва.")
-    print("Через неї проходить старий міст.")
-
-    # страх медика
-    if hero_class == "Медик":
-        print("\nВаша слабкість — висота.")
-        while True:
-            bridge = input("Перейти міст? (так/ні): ").lower()
-            if bridge == "так":
-                hp -= 10
-                print("-10 HP через страх.")
-                break
-            elif bridge == "ні":
-                print("Іншого шляху немає.")
-            else:
-                print("Невірний вибір.")
-    else:
-        print("Ви легко переходите міст.")
-
-    if hp <= 0:
-        print("Ви не витримали.")
-        return
-
     while True:
         print("""
-Ви знайшли ресурси.
+Ви знайшли ресурси біля підніжжя гори.
 
 1. Зібрати ягоди (+5 HP)
-2. Взяти гілку
+2. Знайти деревину
 3. Йти далі
 """)
         choice = input("Ваш вибір: ")
         if choice == "1":
-            inventory.append("Ягоди")
-            hp += 5
+            state["inventory"].append("Ягоди")
+            state["hp"] += 5
             print("+5 HP")
         elif choice == "2":
-            if "Міцна гілка" not in inventory:
-                inventory.append("Міцна гілка")
-                print("Ви отримали міцну гілку.")
+            if "Деревина" not in state["inventory"]:
+                state["inventory"].append("Деревина")
+                print("Ви знайшли міцну деревину для мосту.")
             else:
-                print("Вона вже у вас.")
+                print("Деревина вже у вас.")
         elif choice == "3":
             break
         else:
             print("Невірний вибір.")
 
+    print("\nПеред вами величезна прірва.")
+    print("Старий міст зруйнований, тому потрібно обрати шлях.")
+
+    while True:
+        print("""
+1. Прокласти міст з деревини
+2. Обійти гору (-10 HP через втрату енергії)
+""")
+        bridge = input("Ваш вибір: ")
+        if bridge == "1":
+            if "Деревина" in state["inventory"]:
+                print("Ви проклали міст з деревини та безпечно перейшли прірву.")
+                state["inventory"].remove('Деревина')
+                break
+            else:
+                print("У вас немає деревини. Доведеться обійти гору.")
+        elif bridge == "2":
+            state["hp"] -= 10
+            print("Ви обійшли гору, але втратили 10 HP через втрату енергії.")
+            print("HP:", state["hp"])
+            break
+        else:
+            print("Невірний вибір.")
+
+    if state["hp"] <= 0:
+        print("Ви не витримали виснаження.")
+        return
+
     print("\nНа вершині стоїть мудрець.")
-    print("Лише гідний отримає ключ.")
+    print("Він може дати ключ, але ви можете йти далі без розмови.")
 
     while True:
         answer = input("Поговорити з мудрецем? (так/ні): ").lower()
         if answer == "так":
-            print("Мудрець дав вам ключ.")
-            inventory.append("Ключ")
-            have_key = True
+            riddle = random.choice(RIDDLES)
+            print("\nМудрець задає загадку:")
+            print(riddle["question"])
+            reply = input("Відповідь: ").lower()
+            if reply == riddle["answer"]:
+                print("Мудрець дав вам ключ.")
+                if "Ключ" not in state["inventory"]:
+                    state["inventory"].append("Ключ")
+                state["have_key"] = True
+            else:
+                print("Мудрець хитає головою. Ключ залишається у нього.")
             break
         elif answer == "ні":
-            print("Без ключа далі не пройти.")
+            print("Ви обираєте йти далі без ключа.")
+            break
         else:
             print("Невірний вибір.")
-
-    mountain_complete = True
+    state["mountain_complete"] = True
     print("Ви залишаєте гори.")
 
 # ===========================================
 # LOCATION №4 || VOLCANO
 # ===========================================
 
-volcano_complete = False
-armor = False
-weapon = False
-
-def volcano():
-    global hp
-    global attack
-    global money
-    global inventory
-    global armor
-    global weapon
-    global volcano_complete
-
+def volcano(state):
     print("""
 ===========================
           ВУЛКАН
@@ -359,13 +384,13 @@ def volcano():
 
     # шкода від температури
     damage = 40
-    if armor:
+    if state["armor"]:
         damage = 20
-    hp -= damage
+    state["hp"] -= damage
     print(f"Через спеку ви втратили {damage} HP.")
-    print("HP:", hp)
+    print("HP:", state["hp"])
 
-    if hp <= 0:
+    if state["hp"] <= 0:
         print("Ви не пережили спеку.")
         return
 
@@ -381,24 +406,24 @@ def volcano():
         choice = input("Ваш вибір: ")
 
         if choice == "1":
-            if weapon:
+            if state["weapon"]:
                 print("У вас вже є зброя.")
-            elif money >= 15:
-                money -= 15
-                attack += 15
-                weapon = True
-                inventory.append("Зброя")
+            elif state["money"] >= 15:
+                state["money"] -= 15
+                state["attack"] += 15
+                state["weapon"] = True
+                state["inventory"].append("Зброя")
                 print("Ви купили зброю.")
-                print("АТК:", attack)
+                print("АТК:", state["attack"])
             else:
                 print("Недостатньо грошей.")
         elif choice == "2":
-            if armor:
+            if state["armor"]:
                 print("У вас вже є броня.")
-            elif money >= 15:
-                money -= 15
-                armor = True
-                inventory.append("Бронежилет")
+            elif state["money"] >= 15:
+                state["money"] -= 15
+                state["armor"] = True
+                state["inventory"].append("Бронежилет")
                 print("Ви купили бронежилет.")
             else:
                 print("Недостатньо грошей.")
@@ -414,8 +439,8 @@ def volcano():
    ВОГНЯНИЙ СТРАЖ
 ===========================
 """)
-    while enemy_hp > 0 and hp > 0:
-        print("\nВаш HP:", hp)
+    while enemy_hp > 0 and state["hp"] > 0:
+        print("\nВаш HP:", state["hp"])
         print("HP Стража:", enemy_hp)
         print("""
 1. Атакувати
@@ -424,8 +449,8 @@ def volcano():
         move = input("Ваш вибір: ")
 
         if move == "1":
-            enemy_hp -= attack
-            print(f"Ви завдали {attack} шкоди.")
+            enemy_hp -= state["attack"]
+            print(f"Ви завдали {state['attack']} шкоди.")
         elif move == "2":
             print("Ви ухиляєтесь.")
         else:
@@ -439,10 +464,10 @@ def volcano():
         if move == "2":
             enemy_damage = 10
             print("Ви зменшили отриману шкоду.")
-        hp -= enemy_damage
+        state["hp"] -= enemy_damage
         print(f"Страж завдав {enemy_damage} шкоди.")
 
-    if hp <= 0:
+    if state["hp"] <= 0:
         print("""
 ===========================
         ПОРАЗКА
@@ -455,21 +480,16 @@ def volcano():
       СТРАЖ ПЕРЕМОЖЕНИЙ
 ===========================
 """)
-    money += 20
+    state["money"] += 20
     print("+20 монет")
-    volcano_complete = True
+    state["volcano_complete"] = True
     print("Попереду знаходиться храм.")
 
 # ===========================================
 # FINAL BOSS
 # ===========================================
 
-def final_boss():
-    global hp
-    global attack
-    global inventory
-    global money
-
+def final_boss(state):
     boss_hp = 180
     boss_attack = 25
 
@@ -480,8 +500,8 @@ def final_boss():
 """)
     print("Перед вами Володар Храму!")
 
-    while hp > 0 and boss_hp > 0:
-        print("\nВаш HP:", hp)
+    while state["hp"] > 0 and boss_hp > 0:
+        print("\nВаш HP:", state["hp"])
         print("HP Боса:", boss_hp)
         print("""
 1. Атакувати
@@ -492,36 +512,36 @@ def final_boss():
         choice = input("Ваш вибір: ")
 
         if choice == "1":
-            boss_hp -= attack
-            print(f"Ви завдали {attack} шкоди.")
+            boss_hp -= state["attack"]
+            print(f"Ви завдали {state['attack']} шкоди.")
         elif choice == "2":
             print("Ви готуєтесь ухилятися.")
         elif choice == "3":
-            if len(inventory) == 0:
+            if len(state["inventory"]) == 0:
                 print("Інвентар порожній.")
                 continue
             print("\nПредмети:")
-            for item in inventory:
+            for item in state["inventory"]:
                 print("-", item)
-            item = input("Що використати?: ")
-            if item == "Бинт" and "Бинт" in inventory:
-                inventory.remove("Бинт")
-                hp += 20
-                print("+20 HP")
-            elif item == "Ягоди" and "Ягоди" in inventory:
-                inventory.remove("Ягоди")
-                hp += 5
-                print("+5 HP")
-            elif item == "Вода" and "Вода" in inventory:
-                inventory.remove("Вода")
-                hp += 10
+            item = input("Що використати?: ").strip().lower().capitalize()
+            if item == "Бинт" and "Бинт" in state["inventory"]:
+                state["inventory"].remove("Бинт")
+                state["hp"] += 25
+                print("+25 HP")
+            elif item == "Ягоди" and "Ягоди" in state["inventory"]:
+                state["inventory"].remove("Ягоди")
+                state["hp"] += 10
                 print("+10 HP")
+            elif item == "Вода" and "Вода" in state["inventory"]:
+                state["inventory"].remove("Вода")
+                state["hp"] += 15
+                print("+15 HP")
             else:
                 print("Цей предмет не можна використати.")
                 continue
         elif choice == "4":
             print("\nІНВЕНТАР:")
-            for item in inventory:
+            for item in state["inventory"]:
                 print("-", item)
             continue
         else:
@@ -535,10 +555,18 @@ def final_boss():
         if choice == "2":
             damage = boss_attack // 2
             print("Ви ухилилися частково.")
-        hp -= damage
+        elif choice == "3":
+            damage = boss_attack // 2
+            print("Використовуючи предмет, ви частково ухилилися від удару.")
+
+        if state["armor"]:
+            damage -= 5
+            damage = max(damage, 0)
+
+        state["hp"] -= damage
         print(f"Бос завдав {damage} шкоди.")
 
-    if hp <= 0:
+    if state["hp"] <= 0:
         print("""
 ===========================
         ВИ ПРОГРАЛИ
@@ -551,7 +579,7 @@ def final_boss():
         ПЕРЕМОГА!
 ===========================
 """)
-    money += 50
+    state["money"] += 50
     print("+50 монет")
     return True
 
@@ -559,36 +587,34 @@ def final_boss():
 # LOCATION №5 || TEMPLE
 # ===========================================
 
-def temple():
-    global have_key
-    global inventory
-
+def temple(state):
     print("""
 ===========================
           ХРАМ
 ===========================
 """)
-    if have_key == False:
+    if state["have_key"] == False:
         print("У вас немає ключа.")
         print("ПОГАНА КІНЦІВКА")
-        return
+        return "Погана кінцівка (без ключа)"
 
     print("Ключ відкриває двері.")
-    print("\nСтраж задає загадку:")
-    print("Що завжди збільшується, "
-          "але ніколи не зменшується?")
+    print("\nСторож задає загадку:")
+    riddle = random.choice(RIDDLES)
+    print(riddle["question"])
     answer = input("Відповідь: ").lower()
 
-    if answer == "час":
-        if ("Ключ" in inventory
-                and "Зброя" in inventory
-                and "Бронежилет" in inventory):
+    if answer == riddle["answer"]:
+        if ("Ключ" in state["inventory"]
+                and "Зброя" in state["inventory"]
+                and "Бронежилет" in state["inventory"]):
             print("""
 ⭐⭐⭐⭐⭐
 СЕКРЕТНА КІНЦІВКА
 
 Ви знайшли справжній скарб!
 """)
+            return "Секретна кінцівка"
         else:
             print("""
 ⭐⭐⭐⭐
@@ -596,33 +622,57 @@ def temple():
 
 Ви вибралися з храму!
 """)
+            return "Хороша кінцівка"
     else:
         print("""
 ⭐⭐
 
 ПОГАНА КІНЦІВКА
 
-Страж не пропустив вас.
+Сторож не пропустив вас.
 """)
+        return "Погана кінцівка (невірна відповідь)"
 
 # ===========================================
-# START GAME
+# SAVE RESULT TO FILE
 # ===========================================
 
-start_game()
-choose_class()
+def save_result(state, result_text):
+    with open("results.txt", "a", encoding="utf-8") as f:
+        f.write(
+            f"Гравець: {state['name']} | Клас: {state['hero_class']} | "
+            f"HP: {state['hp']} | Гроші: {state['money']} | Результат: {result_text}\n"
+        )
 
-forest()
+# ===========================================
+# MAIN
+# ===========================================
 
-if hp > 0:
-    desert()
+def main():
+    state = create_state()
 
-if hp > 0:
-    mountains()
+    start_game(state)
+    choose_class(state)
 
-if hp > 0:
-    volcano()
+    forest(state)
 
-if hp > 0:
-    if final_boss():
-        temple()
+    if state["hp"] > 0:
+        desert(state)
+
+    if state["hp"] > 0:
+        mountains(state)
+
+    if state["hp"] > 0:
+        volcano(state)
+
+    if state["hp"] > 0:
+        if final_boss(state):
+            result = temple(state)
+            save_result(state, result)
+        else:
+            save_result(state, "Поразка від фінального боса")
+    else:
+        save_result(state, "Загинув до фінального боса")
+
+
+main()
